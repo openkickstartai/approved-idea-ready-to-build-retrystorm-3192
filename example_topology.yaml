@@ -1,0 +1,61 @@
+# RetryStorm example: e-commerce microservice topology
+# Run: python main.py example_topology.yaml
+services:
+  - name: api-gateway
+    calls:
+      - target: order-service
+        retries: 3
+        timeout_ms: 10000
+        circuit_breaker: false
+      - target: user-service
+        retries: 2
+        timeout_ms: 3000
+        circuit_breaker: true
+
+  - name: order-service
+    calls:
+      - target: payment-service
+        retries: 3
+        timeout_ms: 5000
+        circuit_breaker: false
+      - target: inventory-service
+        retries: 2
+        timeout_ms: 3000
+        circuit_breaker: true
+
+  - name: payment-service
+    calls:
+      - target: fraud-detection
+        retries: 3
+        timeout_ms: 4000
+        circuit_breaker: false
+
+  - name: fraud-detection
+    calls:
+      - target: ml-scoring
+        retries: 2
+        timeout_ms: 2000
+        circuit_breaker: false
+
+  - name: ml-scoring
+    calls: []
+
+  - name: inventory-service
+    calls:
+      - target: warehouse-db
+        retries: 1
+        timeout_ms: 1000
+        circuit_breaker: true
+
+  - name: warehouse-db
+    calls: []
+
+  - name: user-service
+    calls:
+      - target: auth-provider
+        retries: 2
+        timeout_ms: 2000
+        circuit_breaker: true
+
+  - name: auth-provider
+    calls: []
